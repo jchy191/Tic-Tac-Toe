@@ -1,0 +1,16 @@
+#gameboard {
+    display: grid;
+    grid-template-columns: 200px 200px 200px;
+    grid-template-rows: 200px 200px 200px;
+    width: 600px; 
+    border: 1px solid black;
+}
+
+.grid {
+    border: 1px solid black;
+
+    font-family: Helvetica, sans-serif;
+    font-weight: 100;
+    font-size: 180px;
+    text-align: center;
+}
