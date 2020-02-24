@@ -2,22 +2,34 @@ let playerOne;
 let playerTwo;
 
 const gameBoard = (() => {
-    const board = [0,,,,,,,,,];
-
+    let _board = [0,,,,,,,,,];
+    
+    const _threeInARow = (x,y,z) => {
+        if (!x || !y || !z) return;
+        if ((x == y) && (x == z)) return true;
+    }
 
     const checkWin = () => {
+        let [,a,b,c,d,e,f,g,h,i] = _board;
         
-
-
+        if (_threeInARow(a,b,c)) return true;
+        if (_threeInARow(d,e,f)) return true;
+        if (_threeInARow(g,h,i)) return true;
+        if (_threeInARow(a,d,g)) return true;
+        if (_threeInARow(b,e,h)) return true;
+        if (_threeInARow(c,f,i)) return true;
+        if (_threeInARow(a,e,i)) return true;
+        if (_threeInARow(c,d,g)) return true;
+        console.log('not won yet')
     };
 
     const addMarker = (position, marker) => {
-        board[position] = marker;
+        _board[position] = marker;
     }
 
-    const reset = () => {board = [0,,,,,,,,,];}
+    const reset = () => {_board = [0,,,,,,,,,];}
 
-    return {board, addMarker, reset, checkWin};
+    return {_board, _threeInARow, addMarker, reset, checkWin};
 })();
 
 const Player = (name, marker) => {
@@ -37,15 +49,12 @@ const gameFlow = (() => {
         playerTwo = Player("Baba", "O"); //tochange to prompt
     };
 
-    let currentPlayerTurn = 1;
-    let currentPlayerMarker = "X";
-
-    const changeTurn = () => {
-        if (currentPlayerTurn == 1){
-            currentPlayerTurn = 2;
+    const _changeTurn = () => {
+        if (currentPlayerTurn == playerOne.getName()){
+            currentPlayerTurn = playerTwo.getName();
             currentPlayerMarker = playerTwo.getMarker();
         } else {
-            currentPlayerTurn = 1;
+            currentPlayerTurn = playerOne.getName();
             currentPlayerMarker = playerOne.getMarker();
         }
     }
@@ -56,15 +65,31 @@ const gameFlow = (() => {
             if (grid.innerHTML == "") {
                 gameBoard.addMarker(grid.id, currentPlayerMarker);
                 grid.innerHTML = currentPlayerMarker;
-                changeTurn();
+                if (gameBoard.checkWin()) {
+                    console.log('gamewon');
+                    victory();
+                }
+                _changeTurn();
             }                   
         });
     });
+
+    const victory = () => {
+        alert(`${currentPlayerTurn} has won!`)
+        gameBoard.reset();
+        grids.forEach((grid) => {
+            grid.innerHTML = "";
+        })
+        initialisation();
+
+    }
     
     return {initialisation}
 })();
 
 gameFlow.initialisation();
+let currentPlayerTurn = playerOne.getName();
+    let currentPlayerMarker = "X";
 
 
 
