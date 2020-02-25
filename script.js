@@ -1,17 +1,21 @@
 let playerOne;
 let playerTwo;
 
+//GameBoard Module
+
 const gameBoard = (() => {
-    let _board = [0,,,,,,,,,];
     
-    const _threeInARow = (x,y,z) => {
-        if (!x || !y || !z) return;
-        if ((x == y) && (x == z)) return true;
-    }
+    let _board = [0,,,,,,,,,];
 
     const checkWin = () => {
+
         let [,a,b,c,d,e,f,g,h,i] = _board;
-        
+
+        const _threeInARow = (x,y,z) => {
+            if (!x || !y || !z) return;
+            if ((x == y) && (x == z)) return true;
+        }
+
         if (_threeInARow(a,b,c)) return true;
         if (_threeInARow(d,e,f)) return true;
         if (_threeInARow(g,h,i)) return true;
@@ -29,8 +33,10 @@ const gameBoard = (() => {
 
     const reset = () => {_board = [0,,,,,,,,,];}
 
-    return {_board, _threeInARow, addMarker, reset, checkWin};
+    return {_board, addMarker, reset, checkWin};
 })();
+
+//Player Object 
 
 const Player = (name, marker) => {
     
@@ -44,9 +50,30 @@ const Player = (name, marker) => {
 
 const gameFlow = (() => {
     
+    const newGame = document.querySelector('#newgame');
+    newGame.addEventListener('click', () => {
+            console.log("asdfkjl")
+            initialisation();
+        })
+
     const initialisation = () => {
-        playerOne = Player("Ali", "X");
-        playerTwo = Player("Baba", "O"); //tochange to prompt
+        let x = document.querySelector('input#playeronename').value;
+        let y = document.querySelector('input#playertwoname').value;       
+
+        if(x && y){
+            playerOne = Player(x, "X");
+            playerTwo = Player(y, "O");
+
+            currentPlayerMarker = playerOne.getMarker();
+            currentPlayerTurn = playerOne.getName();
+
+            document.querySelector('.gameboard').style.display = "grid";
+            document.querySelector('.newgame').style.display = "none";
+            document.querySelector('.gameongoing').style.display = "block";
+        } else {
+            alert('Please enter the player names');
+        }
+
     };
 
     const _changeTurn = () => {
@@ -61,7 +88,7 @@ const gameFlow = (() => {
 
     const grids = document.querySelectorAll('.grid');
         grids.forEach((grid) => {
-        grid.addEventListener('click', (e) => {
+        grid.addEventListener('click', () => {
             if (grid.innerHTML == "") {
                 gameBoard.addMarker(grid.id, currentPlayerMarker);
                 grid.innerHTML = currentPlayerMarker;
@@ -87,9 +114,6 @@ const gameFlow = (() => {
     return {initialisation}
 })();
 
-gameFlow.initialisation();
-let currentPlayerTurn = playerOne.getName();
-    let currentPlayerMarker = "X";
 
 
 
