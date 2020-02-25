@@ -60,30 +60,30 @@ const gameFlow = (() => {
         let x = document.querySelector('input#playeronename').value;
         let y = document.querySelector('input#playertwoname').value;
         
+        if(x === "" || y === ""){
+            alert('Please enter player names.');
+            return;
+        };
+        
+        if (x === y) {
+            alert('Please enter different player names');
+            return;
+        };
+
         let xCapitalised = x[0].toUpperCase() + x.slice(1, x.length);
         let yCapitalised = y[0].toUpperCase() + y.slice(1, y.length);
 
-        if((x && y) && (x !== y)){
-            
-            playerOne = Player(xCapitalised, "X");
-            playerTwo = Player(yCapitalised, "O");
+        playerOne = Player(xCapitalised, "X");
+        playerTwo = Player(yCapitalised, "O");
 
-            currentPlayerMarker = playerOne.getMarker();
-            currentPlayerTurn = playerOne.getName();
+        currentPlayerMarker = playerOne.getMarker();
+        currentPlayerTurn = playerOne.getName();
 
-            document.querySelector('.gameboard').style.display = "grid";
-            document.querySelector('.gameongoing').style.display = "block";
-            document.querySelector('.newgame').style.display = "none";
-
-        } else {
-            if (x === y) {
-                alert('Please enter different player names');
-            } else {
-            alert('Please enter the player names');
-            }
-        }
-
+        document.querySelector('.gameboard').style.display = "grid";
+        document.querySelector('.gameongoing').style.display = "block";
+        document.querySelector('.newgame').style.display = "none";
     };
+
 
     const _changeTurn = () => {
         if (currentPlayerTurn == playerOne.getName()){
@@ -141,9 +141,7 @@ const gameFlow = (() => {
         document.querySelector('.gameongoing').style.display = "none";
         document.querySelector('.newgame').style.display = "block";
 
-    });  
-    
-    
+    });      
     return {initialisation};
 
 })();

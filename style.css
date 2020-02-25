@@ -1,11 +1,21 @@
-#text{
+html {
+    margin-left: 20px;
+}
+
+#text {
     font-family: Helvetica, sans-serif;
     font-weight: 200;
     font-size: 20px;
 }
 
-h1{
+h1 {
     font-weight: 500;
+    font-size: 50px;
+}
+
+h2 {
+    font-weight: 400;
+    font-size: 30px;
 }
 
 input[type=text]{
