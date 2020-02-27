@@ -69,14 +69,15 @@ const Player = (name, marker) => {
 
 const gameFlow = (() => {
 
-    const gridAIButtons = document.querySelectorAll('.gridAI');
+    //const gridAIButtons = document.querySelectorAll('.gridAI');
     const gridButtons = document.querySelectorAll('.grid');
 
-    let gameMode = 0;
+    let _gameMode = 0;
+    const getGameMode = () => _gameMode;
 
     const _initialisation = () => {
 
-        if (gameMode == 1) {
+        if (_gameMode == 1) {
             playerOne = Player("human", "X");
             playerTwo = Player("AI", "O");
         } else {
@@ -107,7 +108,7 @@ const gameFlow = (() => {
 
     const victory = () => {
         
-        if (gameMode == 2){
+        if (_gameMode == 2){
             document.querySelector('#gametext').innerHTML = 
             `${currentPlayerTurn} has won! Press the button to reset the game.`;
         } else if (currentPlayerTurn = "human"){
@@ -117,6 +118,7 @@ const gameFlow = (() => {
             document.querySelector('#gametext').innerHTML = 
             `Oh no! You lost! Press the button to reset the game.`;
         }
+        currentPlayerMarker = "";
     };
 
     const draw = () => {
@@ -126,7 +128,7 @@ const gameFlow = (() => {
 
     const newGameButton = document.querySelector('#newgame');
     newGameButton.addEventListener('click', () => {
-        gameMode = 2;     
+        _gameMode = 2;     
         _initialisation();
 
         document.querySelector('.gameboard').style.display = "grid";
@@ -140,16 +142,19 @@ const gameFlow = (() => {
 
     const newAIGameButton = document.querySelector('#newAIgame');
     newAIGameButton.addEventListener('click', () => {
-        
-        gameMode = 1;
+        _gameMode = 1;
         _initialisation();
 
-        document.querySelector('.gameboardAI').style.display = "grid";
+        document.querySelector('.gameboard').style.display = "grid";
         document.querySelector('#gametext').innerHTML = 
             `It's now your turn! Have fun! Press the button to reset the game.`;
         document.querySelector('.gameongoing').style.display = "block";
         document.querySelector('.newgame').style.display = "none";
         
+        gridButtons.forEach((grid) => {
+            grid.innerHTML = "";
+        });
+
     });
 
 
@@ -160,21 +165,16 @@ const gameFlow = (() => {
             grid.innerHTML = "";
         });
 
-        gridAIButtons.forEach((grid) => {
-            grid.innerHTML = "";
-        });
-
         document.querySelector('.gameboard').style.display = "none";
-        document.querySelector('.gameboardAI').style.display = "none";
         document.querySelector('.gameongoing').style.display = "none";
         document.querySelector('.newgame').style.display = "block";
         
         gameBoard.reset();
-        gameMode = 0;
+        _gameMode = 0;
 
     });    
 
-    return {victory, draw};
+    return {victory, draw, getGameMode};
 })();
 
 //GameFlowTwoPlayer Module
@@ -182,7 +182,7 @@ const gameFlow = (() => {
 const GameFlowTwoPlayer = (() => {
 
     const _changeTurn = () => {
-        if (currentPlayerTurn == playerOne.getName()){
+        if (currentPlayerTurn === playerOne.getName()){
             currentPlayerTurn = playerTwo.getName();
             currentPlayerMarker = playerTwo.getMarker();
         } else {
@@ -191,13 +191,68 @@ const GameFlowTwoPlayer = (() => {
         }
         document.querySelector('#gametext').innerHTML = 
             `It's now ${currentPlayerTurn}'s turn! Have fun! Press the button to reset the game.`;
-    }
+    };
 
 
     const gridButtons = document.querySelectorAll('.grid');
-        gridButtons.forEach((grid) => {
+    gridButtons.forEach((grid) => {
         grid.addEventListener('click', () => {
-            if (grid.innerHTML === "") {
+            if (grid.innerHTML === "" && gameFlow.getGameMode() == 2) {
+                gameBoard.addMarker(grid.id, currentPlayerMarker);
+                grid.innerHTML = currentPlayerMarker;
+                if (gameBoard.checkWin() === "win") {
+                    gameFlow.victory();
+                    return;
+                };
+                if (gameBoard.checkWin() === "drawn"){
+                    gameFlow.draw();
+                    return;
+                };
+                _changeTurn();
+            };                
+        });
+    });
+})();
+
+
+
+//GameFlowSinglePlayer Module
+
+const GameFlowSinglePlayer = (() => {
+
+    const _computerTurn = () => {
+        
+        let _availMoves = gameBoard.availGrids(gameBoard.currentBoard());
+        let i = Math.floor(Math.random() * _availMoves.length);
+        gameBoard.addMarker(_availMoves[i], currentPlayerMarker);
+
+        const grids = document.querySelectorAll('.grid');
+        grids.forEach((grid) => {
+            if (grid.id == _availMoves[i]){
+                grid.innerHTML = currentPlayerMarker;
+            };
+        });
+        
+        if (gameBoard.checkWin() === "win") {
+            gameFlow.victory();
+            return;
+        };
+        if (gameBoard.checkWin() === "drawn"){
+            gameFlow.draw();
+            return;
+        };
+        
+        currentPlayerMarker = playerOne.getMarker();
+        currentPlayerTurn = playerOne.getName();
+
+        document.querySelector('#gametext').innerHTML = 
+            `It's now your turn! Press the button to reset the game.`;
+    }; 
+
+    const gridButtons = document.querySelectorAll('.grid');
+    gridButtons.forEach((grid) => {
+        grid.addEventListener('click', () => {
+            if (grid.innerHTML === "" && gameFlow.getGameMode() === 1 && currentPlayerMarker === playerOne.getMarker()) {
                 gameBoard.addMarker(grid.id, currentPlayerMarker);
                 grid.innerHTML = currentPlayerMarker;
                 if (gameBoard.checkWin() === "win") {
@@ -209,79 +264,17 @@ const GameFlowTwoPlayer = (() => {
                     gameFlow.draw();
                     return;
                 };
-                _changeTurn();
+
+                currentPlayerMarker = playerTwo.getMarker();
+                currentPlayerTurn = playerTwo.getName();
+
+                setTimeout(_computerTurn, 500);
+
+                document.querySelector('#gametext').innerHTML = 
+                `The computer is thinking... Press the button to reset the game.`;
             };                
         });
     });
- 
-})();
-
-
-
-//GameFlowSinglePlayer Module
-
-const GameFlowSinglePlayer = (() => {
-
-    
-    const _computerTurn = () => {
-        
-        currentPlayerMarker = playerTwo.getMarker();
-        currentPlayerTurn = playerTwo.getName();
-
-        let _availMoves = gameBoard.availGrids(gameBoard.currentBoard());
-        let i = Math.floor(Math.random() * _availMoves.length);
-        gameBoard.addMarker(_availMoves[i], currentPlayerMarker);
-
-        const grids = document.querySelectorAll('.gridAI');
-        grids.forEach((grid) => {
-            if (grid.id == _availMoves[i]){
-                grid.innerHTML = currentPlayerMarker;
-            };
-        });
-        
-        currentPlayerMarker = playerOne.getMarker();
-        currentPlayerTurn = playerOne.getName();
-
-        if (gameBoard.checkWin() === "win") {
-            gameFlow.victory();
-            currentPlayerMarker = "";
-            return;
-        };
-        if (gameBoard.checkWin() === "drawn"){
-            gameFlow.draw();
-            return;
-        };
-
-        document.querySelector('#gametext').innerHTML = 
-            `It's now your turn! Press the button to reset the game.`;
-    }; 
-
-    const gridButtons = document.querySelectorAll('.gridAI');
-    gridButtons.forEach((grid) => {
-    grid.addEventListener('click', () => {
-
-
-
-        if (grid.innerHTML === "") {
-            gameBoard.addMarker(grid.id, currentPlayerMarker);
-            grid.innerHTML = currentPlayerMarker;
-            if (gameBoard.checkWin() === "win") {
-                gameFlow.victory();
-                currentPlayerMarker = "";
-                return;
-            };
-            if (gameBoard.checkWin() === "drawn"){
-                gameFlow.draw();
-                return;
-            };
-            setTimeout(_computerTurn, 1500);
-            document.querySelector('#gametext').innerHTML = 
-            `The computer is thinking... Press the button to reset the game.`;
-        };                
-    });
-
-});
-
 })();
 
 
