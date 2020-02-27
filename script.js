@@ -181,6 +181,9 @@ const computerBrain = (() => {
     let aiPlayer = Player("AI", "O");
     
     
+    
+
+    const findBestMove = (board => {
 
     const findBestMove = (board => {
 
