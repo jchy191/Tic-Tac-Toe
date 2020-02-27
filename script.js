@@ -1,8 +1,55 @@
-let playerOne;
-let playerTwo;
+//GameBoard Module
+
+const gameBoard = (() => {
+    
+    let _board = [0,"","","","","","","","",""];
+    let [,a,b,c,d,e,f,g,h,i] = _board;
+
+
+    const checkWin = () => {
+        [,a,b,c,d,e,f,g,h,i] = _board;
+        console.log(a,b,c,d,e,f,g,h,i);
+        const _threeInARow = (x,y,z) => {
+            if (!x || !y || !z) return;
+            if ((x == y) && (x == z)) return "win";
+        };
+
+        if (_threeInARow(d,e,f)) return "win";
+        if (_threeInARow(g,h,i)) return "win";
+        if (_threeInARow(a,d,g)) return "win";
+        if (_threeInARow(b,e,h)) return "win";
+        if (_threeInARow(c,f,i)) return "win";
+        if (_threeInARow(a,e,i)) return "win";
+        if (_threeInARow(c,e,g)) return "win";
+        if (a && b && c && d && e && f && g && h && i) {
+            return "drawn";
+        };
+    };
+
+    const addMarker = (position, marker) => {
+        _board[position] = marker;
+    };
+
+    const availGrids = (board) => {
+        let available = [];
+        for (let i = 1; i <= 9; i++){
+            if (board[i] === "") available.push(i);
+        };
+        return available;
+    };
+
+    const reset = () => {
+        _board = [0,"","","","","","","","",""];
+    };
+
+    return {_board, addMarker, availGrids, reset, checkWin};
+})();
 
 
 //Player Object 
+
+let playerOne;
+let playerTwo;
 
 const Player = (name, marker) => {
     
@@ -13,48 +60,10 @@ const Player = (name, marker) => {
 };
 
 
-//GameBoard Module
 
-const gameBoard = (() => {
-    
-    let _board = [0,,,,,,,,,];
+//GameFlowTwoPlayer Module
 
-    const checkWin = () => {
-
-        let [,a,b,c,d,e,f,g,h,i] = _board;
-
-        const _threeInARow = (x,y,z) => {
-            if (!x || !y || !z) return;
-            if ((x == y) && (x == z)) return "win";
-        }
-
-        if (_threeInARow(a,b,c)) return "win";
-        if (_threeInARow(d,e,f)) return "win";
-        if (_threeInARow(g,h,i)) return "win";
-        if (_threeInARow(a,d,g)) return "win";
-        if (_threeInARow(b,e,h)) return "win";
-        if (_threeInARow(c,f,i)) return "win";
-        if (_threeInARow(a,e,i)) return "win";
-        if (_threeInARow(c,d,g)) return "win";
-        if (a && b && c && d && e && f && g && h && i) {
-            return "drawn";
-        }
-        console.log('not won yet')
-    };
-
-    const addMarker = (position, marker) => {
-        _board[position] = marker;
-    }
-
-    const reset = () => {_board = [0,,,,,,,,,];}
-
-    return {_board, addMarker, reset, checkWin};
-})();
-
-
-//GameFlow Module
-
-const gameFlow = (() => {
+const GameFlowTwoPlayer = (() => {
 
     const initialisation = () => {
         let x = document.querySelector('input#playeronename').value;
@@ -79,9 +88,7 @@ const gameFlow = (() => {
         currentPlayerMarker = playerOne.getMarker();
         currentPlayerTurn = playerOne.getName();
 
-        document.querySelector('.gameboard').style.display = "grid";
-        document.querySelector('.gameongoing').style.display = "block";
-        document.querySelector('.newgame').style.display = "none";
+
     };
 
 
@@ -93,6 +100,8 @@ const gameFlow = (() => {
             currentPlayerTurn = playerOne.getName();
             currentPlayerMarker = playerOne.getMarker();
         }
+        document.querySelector('#gametext').innerHTML = 
+            `It's now ${currentPlayerTurn}'s turn! Have fun! Press the button to reset the game.`;
     }
     const _victory = () => {
             document.querySelector('#gametext').innerHTML = 
@@ -104,6 +113,7 @@ const gameFlow = (() => {
         `The game is drawn! Press the button to reset the game.`;
     };
 
+    //Buttons
 
     const gridButtons = document.querySelectorAll('.grid');
         gridButtons.forEach((grid) => {
@@ -112,11 +122,13 @@ const gameFlow = (() => {
                 gameBoard.addMarker(grid.id, currentPlayerMarker);
                 grid.innerHTML = currentPlayerMarker;
                 if (gameBoard.checkWin() === "win") {
-                    console.log('gamewon');
                     _victory();
+                    currentPlayerMarker = "";
+                    return;
                 };
                 if (gameBoard.checkWin() === "drawn"){
                     _gamedrawn();
+                    return;
                 };
                 _changeTurn();
             };                
@@ -126,13 +138,18 @@ const gameFlow = (() => {
     const newGameButton = document.querySelector('#newgame');
     newGameButton.addEventListener('click', () => {
         initialisation();
+
+        document.querySelector('.gameboard').style.display = "grid";
+        document.querySelector('.gameongoing').style.display = "block";
+        document.querySelector('.newgame').style.display = "none";
+        document.querySelector('#gametext').innerHTML = 
+        `It's now ${currentPlayerTurn}'s turn! Have fun! Press the button to reset the game.`;
     });
 
 
     const resetButton = document.querySelector('#resetgame');
     resetButton.addEventListener('click', () => {
 
-        gameBoard.reset();
         gridButtons.forEach((grid) => {
             grid.innerHTML = "";
         });
@@ -140,39 +157,81 @@ const gameFlow = (() => {
         document.querySelector('.gameboard').style.display = "none";
         document.querySelector('.gameongoing').style.display = "none";
         document.querySelector('.newgame').style.display = "block";
+        
+        gameBoard.reset();
 
     });      
     return {initialisation};
 
 })();
 
-
-
-
-    
-
-
-
 /*
-gameBoard module:
-    M addmarker
-    M check for winning
-    M reset
+//GameFlowSinglePlayer Module
 
-Players:
-    P Name
-    P Marker
-    M getname
+const GameFlowSinglePlayer = (() => {
 
-Buttons:
-    id is position array
+   // return {humanPlayer, aiPlayer};
 
-Gameflow:
+})();
+
+
+const computerBrain = (() => {
     
-    P whose turn 
-    M checking if game over
+  //  let humanPlayer = Player("human", "X");
+    let aiPlayer = Player("AI", "O");
+    
+    
 
-    Buttons: check turn & current square vacancy, then addmarker, then check 
+    const findBestMove = (board => {
 
-Initialsation
-*/
+        let _availMoves = gameBoard.availGrids(gameBoard._board);
+        let moves = [];
+
+
+        _availMoves.forEach(index => {
+            let newBoard = board;
+            newBoard[index] = aiPlayer.getMarker();
+            let moveScore = _minimax(newBoard, 0, "AI");
+            moves.push({index: index, score: moveScore});
+        });
+
+        return moves;
+    });
+
+
+    const _minimax = (board, depth, player) => {
+        
+        let _availMoves = gameBoard.availGrids(board);
+
+        if (gameBoard.checkWin() === "drawn") return 0;
+        if (gameBoard.checkWin() === "win" && player === "human") return -10 + depth;
+        if (gameBoard.checkWin() === "win" && player === "AI") return 10 - depth;
+
+        
+        if (player === "AI"){
+            let bestValue = -Infinity
+            _availMoves.forEach(index => {
+                let newBoard = board;
+                newBoard[index] = aiPlayer.getMarker();
+                let value = _minimax(newBoard, depth+1, "human");
+                bestValue = Math.max(bestValue, value);
+            });
+            return bestValue;
+        };
+
+        if (player === "human"){
+            let bestValue = +Infinity
+            _availMoves.forEach(index => {
+                let newBoard = board;
+                newBoard[index] = aiPlayer.getMarker();
+                let value = _minimax(newBoard, depth+1, "AI");
+                bestValue = Math.min(bestValue, value);
+            });
+            return bestValue;
+        };
+        
+    };
+
+    return{findBestMove}
+
+})();*/
