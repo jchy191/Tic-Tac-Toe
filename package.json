@@ -1,0 +1,22 @@
+{
+  "name": "tic-tac-toe",
+  "version": "1.0.0",
+  "description": "An Odin Project",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jchy191/Tic-Tac-Toe.git"
+  },
+  "author": "Joshua Chin <joshuachin191@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jchy191/Tic-Tac-Toe/issues"
+  },
+  "homepage": "https://github.com/jchy191/Tic-Tac-Toe#readme",
+  "dependencies": {
+    "eslint": "^6.8.0"
+  }
+}

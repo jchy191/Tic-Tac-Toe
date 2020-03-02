@@ -69,7 +69,6 @@ const Player = (name, marker) => {
 
 const gameFlow = (() => {
 
-    //const gridAIButtons = document.querySelectorAll('.gridAI');
     const gridButtons = document.querySelectorAll('.grid');
 
     let _gameMode = 0;
