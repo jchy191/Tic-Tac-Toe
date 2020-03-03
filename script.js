@@ -1,7 +1,6 @@
 //GameBoard Module
 
 const gameBoard = (() => {
-    
     let _board = [0,"","","","","","","","",""];
 
     const currentBoard = () => {
@@ -16,7 +15,7 @@ const gameBoard = (() => {
         let available = [];
         for (let i = 1; i <= 9; i++){
             if (board[i] === "") available.push(i);
-        };
+        }
         return available;
     };
 
@@ -42,7 +41,7 @@ const gameBoard = (() => {
         if (_threeInARow(c,e,g)) return "win";
         if (a && b && c && d && e && f && g && h && i) {
             return "drawn";
-        };
+        }
     };
 
     return {currentBoard, addMarker, availGrids, reset, checkWin};
@@ -86,19 +85,19 @@ const gameFlow = (() => {
             if(x === "" || y === ""){
                 alert('Please enter player names.');
                 return;
-            };
+            }
             
             if (x === y) {
                 alert('Please enter different player names');
                 return;
-            };
+            }
 
             let xCapitalised = x[0].toUpperCase() + x.slice(1, x.length);
             let yCapitalised = y[0].toUpperCase() + y.slice(1, y.length);
 
             playerOne = Player(xCapitalised, "X");
             playerTwo = Player(yCapitalised, "O");
-        };
+        }
 
         currentPlayerMarker = playerOne.getMarker();
         currentPlayerTurn = playerOne.getName();
@@ -110,7 +109,7 @@ const gameFlow = (() => {
         if (_gameMode == 2){
             document.querySelector('#gametext').innerHTML = 
             `${currentPlayerTurn} has won! Press the button to reset the game.`;
-        } else if (currentPlayerTurn = "human"){
+        } else if (currentPlayerTurn == "human"){
             document.querySelector('#gametext').innerHTML = 
             `You have won! Press the button to reset the game.`;
         } else {
@@ -202,17 +201,17 @@ const GameFlowTwoPlayer = (() => {
                 if (gameBoard.checkWin() === "win") {
                     gameFlow.victory();
                     return;
-                };
+                }
                 if (gameBoard.checkWin() === "drawn"){
                     gameFlow.draw();
                     return;
-                };
+                }
                 _changeTurn();
-            };                
+            }        
         });
     });
 })();
-
+console.log("hi");
 
 
 //GameFlowSinglePlayer Module
@@ -229,17 +228,17 @@ const GameFlowSinglePlayer = (() => {
         grids.forEach((grid) => {
             if (grid.id == _availMoves[i]){
                 grid.innerHTML = currentPlayerMarker;
-            };
+            }
         });
         
         if (gameBoard.checkWin() === "win") {
             gameFlow.victory();
             return;
-        };
+        }
         if (gameBoard.checkWin() === "drawn"){
             gameFlow.draw();
             return;
-        };
+        }
         
         currentPlayerMarker = playerOne.getMarker();
         currentPlayerTurn = playerOne.getName();
@@ -258,11 +257,11 @@ const GameFlowSinglePlayer = (() => {
                     gameFlow.victory();
                     currentPlayerMarker = "";
                     return;
-                };
+                }
                 if (gameBoard.checkWin() === "drawn"){
                     gameFlow.draw();
                     return;
-                };
+                }
 
                 currentPlayerMarker = playerTwo.getMarker();
                 currentPlayerTurn = playerTwo.getName();
@@ -271,7 +270,7 @@ const GameFlowSinglePlayer = (() => {
 
                 document.querySelector('#gametext').innerHTML = 
                 `The computer is thinking... Press the button to reset the game.`;
-            };                
+            }              
         });
     });
 })();
@@ -286,9 +285,6 @@ const GameFlowSinglePlayer = (() => {
 
 const computerBrain = (() => {
     
-    
-
-
     const findBestMove = (board) => {
 
         let _availMoves = gameBoard.availGrids(gameBoard.currentBoard());
@@ -324,7 +320,7 @@ const computerBrain = (() => {
                 bestValue = Math.max(bestValue, value);
             });
             return bestValue;
-        };
+        }
 
         if (player === "human"){
             let bestValue = +Infinity
@@ -335,7 +331,7 @@ const computerBrain = (() => {
                 bestValue = Math.min(bestValue, value);
             });
             return bestValue;
-        };
+        }
         
     };
 
