@@ -25,7 +25,6 @@ const gameBoard = (() => {
 
     const checkWin = () => {
         let [,a,b,c,d,e,f,g,h,i] = _board;
-        console.log(a,b,c,d,e,f,g,h,i);
 
         const _threeInARow = (x,y,z) => {
             if (!x || !y || !z) return;
@@ -53,25 +52,83 @@ const gameBoard = (() => {
 
 let playerOne;
 let playerTwo;
-    
-let currentPlayerTurn;
-let currentPlayerMarker;
 
 const Player = (name, marker) => {
     
-    const getName = () => name;
-    const getMarker = () => marker;
+    let _name = name;
+    let _marker = marker;
     
-    return {getName, getMarker};
+    return {
+        get name(){
+            return _name;
+        },
+        get marker(){
+            return _marker;
+        }
+    }
 };
+
+const display = (() => {
+
+    const victory = () => {
+        if (gameFlow.gameMode === 2){
+            document.querySelector('#gametext').innerHTML = 
+            `${gameFlow.currentPlayerTurn} has won! Press the button to reset the game.`;
+        } else if (gameFlow.currentPlayerTurn == "human"){
+            document.querySelector('#gametext').innerHTML = 
+            `You have won! Press the button to reset the game.`;
+        } else {
+            document.querySelector('#gametext').innerHTML = 
+            `Oh no! You lost! Press the button to reset the game.`;
+        }
+        gameFlow.currentPlayerMarker = "";
+    };
+
+    const draw = () => {
+        document.querySelector('#gametext').innerHTML = 
+        `The game is drawn! Press the button to reset the game.`;
+    };
+
+    const changeTurn = () => {
+        document.querySelector('#gametext').innerHTML = 
+        `It's now ${gameFlow.currentPlayerTurn}'s turn! Have fun! Press the button to reset the game.`;
+    };
+
+    const yourTurn = () => {
+        document.querySelector('#gametext').innerHTML = 
+            `It's now your turn! Have fun! Press the button to reset the game.`;
+    };
+
+    const computerTurn = () => {
+        document.querySelector('#gametext').innerHTML = 
+                `The computer is thinking... Press the button to reset the game.`;
+    };
+
+    const gameBegin = () => {
+        document.querySelector('.gameboard').style.display = "grid";
+        document.querySelector('.gameongoing').style.display = "block";
+        document.querySelector('.newgame').style.display = "none";
+    };
+
+    const startingPage = () => {
+        document.querySelector('.gameboard').style.display = "none";
+        document.querySelector('.gameongoing').style.display = "none";
+        document.querySelector('.newgame').style.display = "block";
+    };
+
+    return {victory, draw, changeTurn, yourTurn, computerTurn, gameBegin, startingPage};
+
+})();
 
 
 const gameFlow = (() => {
-
+        
+    let _currentPlayerTurn;
+    let _currentPlayerMarker;
+    
     const gridButtons = document.querySelectorAll('.grid');
 
     let _gameMode = 0;
-    const getGameMode = () => _gameMode;
 
     const _initialisation = () => {
 
@@ -99,29 +156,9 @@ const gameFlow = (() => {
             playerTwo = Player(yCapitalised, "O");
         }
 
-        currentPlayerMarker = playerOne.getMarker();
-        currentPlayerTurn = playerOne.getName();
+        _currentPlayerMarker = playerOne.marker;
+        _currentPlayerTurn = playerOne.name;
 
-    };
-
-    const victory = () => {
-        
-        if (_gameMode == 2){
-            document.querySelector('#gametext').innerHTML = 
-            `${currentPlayerTurn} has won! Press the button to reset the game.`;
-        } else if (currentPlayerTurn == "human"){
-            document.querySelector('#gametext').innerHTML = 
-            `You have won! Press the button to reset the game.`;
-        } else {
-            document.querySelector('#gametext').innerHTML = 
-            `Oh no! You lost! Press the button to reset the game.`;
-        }
-        currentPlayerMarker = "";
-    };
-
-    const draw = () => {
-        document.querySelector('#gametext').innerHTML = 
-        `The game is drawn! Press the button to reset the game.`;
     };
 
     const newGameButton = document.querySelector('#newgame');
@@ -129,12 +166,8 @@ const gameFlow = (() => {
         _gameMode = 2;     
         _initialisation();
 
-        document.querySelector('.gameboard').style.display = "grid";
-        document.querySelector('#gametext').innerHTML = 
-            `It's now ${currentPlayerTurn}'s turn! Have fun! Press the button to reset the game.`;
-        document.querySelector('.gameongoing').style.display = "block";
-        document.querySelector('.newgame').style.display = "none";
-        
+        display.gameBegin();
+        display.changeTurn();
     });
 
 
@@ -143,11 +176,8 @@ const gameFlow = (() => {
         _gameMode = 1;
         _initialisation();
 
-        document.querySelector('.gameboard').style.display = "grid";
-        document.querySelector('#gametext').innerHTML = 
-            `It's now your turn! Have fun! Press the button to reset the game.`;
-        document.querySelector('.gameongoing').style.display = "block";
-        document.querySelector('.newgame').style.display = "none";
+        display.gameBegin();
+        display.yourTurn();
         
         gridButtons.forEach((grid) => {
             grid.innerHTML = "";
@@ -162,48 +192,60 @@ const gameFlow = (() => {
         gridButtons.forEach((grid) => {
             grid.innerHTML = "";
         });
-
-        document.querySelector('.gameboard').style.display = "none";
-        document.querySelector('.gameongoing').style.display = "none";
-        document.querySelector('.newgame').style.display = "block";
         
+        display.startingPage();
         gameBoard.reset();
         _gameMode = 0;
 
     });    
 
-    return {victory, draw, getGameMode};
+    return {
+        get gameMode() {
+            return _gameMode;
+        },
+        get currentPlayerTurn() {
+            return _currentPlayerTurn;
+        },
+        set currentPlayerTurn(input) {
+            _currentPlayerTurn = input;
+        },
+        get currentPlayerMarker() {
+            return _currentPlayerMarker;
+        },
+        set currentPlayerMarker(input) {
+            _currentPlayerMarker = input;
+        }
+    };
 })();
 
 //GameFlowTwoPlayer Module
 
-const GameFlowTwoPlayer = (() => {
+const TwoPlayer = (() => {
 
     const _changeTurn = () => {
-        if (currentPlayerTurn === playerOne.getName()){
-            currentPlayerTurn = playerTwo.getName();
-            currentPlayerMarker = playerTwo.getMarker();
+        if (gameFlow.currentPlayerTurn == playerOne.name){
+            gameFlow.currentPlayerTurn = playerTwo.name;
+            gameFlow.currentPlayerMarker = playerTwo.marker;
         } else {
-            currentPlayerTurn = playerOne.getName();
-            currentPlayerMarker = playerOne.getMarker();
+            gameFlow.currentPlayerTurn = playerOne.name;
+            gameFlow.currentPlayerMarker = playerOne.marker;
         }
-        document.querySelector('#gametext').innerHTML = 
-            `It's now ${currentPlayerTurn}'s turn! Have fun! Press the button to reset the game.`;
+        display.changeTurn();
     };
 
 
     const gridButtons = document.querySelectorAll('.grid');
     gridButtons.forEach((grid) => {
         grid.addEventListener('click', () => {
-            if (grid.innerHTML === "" && gameFlow.getGameMode() == 2) {
-                gameBoard.addMarker(grid.id, currentPlayerMarker);
-                grid.innerHTML = currentPlayerMarker;
+            if (grid.innerHTML === "" && gameFlow.gameMode == 2) {
+                gameBoard.addMarker(grid.id, gameFlow.currentPlayerMarker);
+                grid.innerHTML = gameFlow.currentPlayerMarker;
                 if (gameBoard.checkWin() === "win") {
-                    gameFlow.victory();
+                    display.victory();
                     return;
                 }
                 if (gameBoard.checkWin() === "drawn"){
-                    gameFlow.draw();
+                    display.draw();
                     return;
                 }
                 _changeTurn();
@@ -211,65 +253,62 @@ const GameFlowTwoPlayer = (() => {
         });
     });
 })();
-console.log("hi");
 
 
 //GameFlowSinglePlayer Module
 
-const GameFlowSinglePlayer = (() => {
+const SinglePlayer = (() => {
 
-    const _computerTurn = () => {
+    const _computerMove = () => {
         
         let _availMoves = gameBoard.availGrids(gameBoard.currentBoard());
         let i = Math.floor(Math.random() * _availMoves.length);
-        gameBoard.addMarker(_availMoves[i], currentPlayerMarker);
+        gameBoard.addMarker(_availMoves[i], gameFlow.currentPlayerMarker);
 
         const grids = document.querySelectorAll('.grid');
         grids.forEach((grid) => {
             if (grid.id == _availMoves[i]){
-                grid.innerHTML = currentPlayerMarker;
+                grid.innerHTML = gameFlow.currentPlayerMarker;
             }
         });
         
         if (gameBoard.checkWin() === "win") {
-            gameFlow.victory();
+            display.victory();
             return;
         }
         if (gameBoard.checkWin() === "drawn"){
-            gameFlow.draw();
+            display.draw();
             return;
         }
         
-        currentPlayerMarker = playerOne.getMarker();
-        currentPlayerTurn = playerOne.getName();
+        gameFlow.currentPlayerMarker = playerOne.marker;
+        gameFlow.currentPlayerTurn = playerOne.name;
 
-        document.querySelector('#gametext').innerHTML = 
-            `It's now your turn! Press the button to reset the game.`;
+        display.yourTurn();
     }; 
 
     const gridButtons = document.querySelectorAll('.grid');
     gridButtons.forEach((grid) => {
         grid.addEventListener('click', () => {
-            if (grid.innerHTML === "" && gameFlow.getGameMode() === 1 && currentPlayerMarker === playerOne.getMarker()) {
-                gameBoard.addMarker(grid.id, currentPlayerMarker);
-                grid.innerHTML = currentPlayerMarker;
+            if (grid.innerHTML === "" && gameFlow.gameMode === 1 && gameFlow.currentPlayerMarker === playerOne.marker) {
+                gameBoard.addMarker(grid.id, gameFlow.currentPlayerMarker);
+                grid.innerHTML = gameFlow.currentPlayerMarker;
                 if (gameBoard.checkWin() === "win") {
-                    gameFlow.victory();
-                    currentPlayerMarker = "";
+                    display.victory();
+                    gameFlow.currentPlayerMarker = "";
                     return;
                 }
                 if (gameBoard.checkWin() === "drawn"){
-                    gameFlow.draw();
+                    display.draw();
                     return;
                 }
 
-                currentPlayerMarker = playerTwo.getMarker();
-                currentPlayerTurn = playerTwo.getName();
+                gameFlow.currentPlayerMarker = playerTwo.marker;
+                gameFlow.currentPlayerTurn = playerTwo.name;
 
-                setTimeout(_computerTurn, 500);
+                setTimeout(_computerMove, 500);
 
-                document.querySelector('#gametext').innerHTML = 
-                `The computer is thinking... Press the button to reset the game.`;
+                display.computerTurn();
             }              
         });
     });
