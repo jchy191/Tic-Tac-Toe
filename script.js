@@ -3,9 +3,7 @@
 const gameBoard = (() => {
     let _board = [0,"","","","","","","","",""];
 
-    const currentBoard = () => {
-        return _board;
-    };
+    
 
     const addMarker = (position, marker) => {
         _board[position] = marker;
@@ -23,8 +21,8 @@ const gameBoard = (() => {
         _board = [0,"","","","","","","","",""];
     };
 
-    const checkWin = () => {
-        let [,a,b,c,d,e,f,g,h,i] = _board;
+    const checkWin = (board) => {
+        let [,a,b,c,d,e,f,g,h,i] = board;
 
         const _threeInARow = (x,y,z) => {
             if (!x || !y || !z) return;
@@ -43,7 +41,14 @@ const gameBoard = (() => {
         }
     };
 
-    return {currentBoard, addMarker, availGrids, reset, checkWin};
+    return {
+        get board(){
+            return _board;
+        }, 
+        addMarker, 
+        availGrids, 
+        reset, 
+        checkWin};
 
 })();
 
@@ -130,59 +135,55 @@ const gameFlow = (() => {
 
     let _gameMode = 0;
 
-    const _initialisation = () => {
 
-        if (_gameMode == 1) {
-            playerOne = Player("human", "X");
-            playerTwo = Player("AI", "O");
-        } else {
-            let x = document.querySelector('input#playeronename').value;
-            let y = document.querySelector('input#playertwoname').value;
+    const newGameButton = document.querySelector('.newgamebutton');
+    newGameButton.addEventListener('click', () => {
+        _gameMode = 2;     
+        let x = document.querySelector('input#playeronename').value;
+        let y = document.querySelector('input#playertwoname').value;
             
-            if(x === "" || y === ""){
-                alert('Please enter player names.');
-                return;
-            }
-            
-            if (x === y) {
-                alert('Please enter different player names');
-                return;
-            }
-
-            let xCapitalised = x[0].toUpperCase() + x.slice(1, x.length);
-            let yCapitalised = y[0].toUpperCase() + y.slice(1, y.length);
-
-            playerOne = Player(xCapitalised, "X");
-            playerTwo = Player(yCapitalised, "O");
+        if(x === "" || y === ""){
+            alert('Please enter player names.');
+            return;
         }
+        
+        if (x === y) {
+            alert('Please enter different player names');
+            return;
+        }
+
+        let xCapitalised = x[0].toUpperCase() + x.slice(1, x.length);
+        let yCapitalised = y[0].toUpperCase() + y.slice(1, y.length);
+
+        playerOne = Player(xCapitalised, "X");
+        playerTwo = Player(yCapitalised, "O");
 
         _currentPlayerMarker = playerOne.marker;
         _currentPlayerTurn = playerOne.name;
-
-    };
-
-    const newGameButton = document.querySelector('#newgame');
-    newGameButton.addEventListener('click', () => {
-        _gameMode = 2;     
-        _initialisation();
 
         display.gameBegin();
         display.changeTurn();
     });
 
 
-    const newAIGameButton = document.querySelector('#newAIgame');
-    newAIGameButton.addEventListener('click', () => {
-        _gameMode = 1;
-        _initialisation();
+    const newAIGameButton = document.querySelectorAll('.newAIgamebutton');
+    newAIGameButton.forEach(button => {
+        button.addEventListener('click', (e) => {
 
-        display.gameBegin();
-        display.yourTurn();
-        
-        gridButtons.forEach((grid) => {
-            grid.innerHTML = "";
+            playerOne = Player("human", "X");
+            playerTwo = Player("AI", "O");
+            _currentPlayerMarker = playerOne.marker;
+            _currentPlayerTurn = playerOne.name;
+
+            display.gameBegin();
+            display.yourTurn();
+            
+            gridButtons.forEach((grid) => {
+                grid.innerHTML = "";
+            });
+            if (e.target.id === "easyai") _gameMode = 1.1;
+            if (e.target.id === "hardai") _gameMode = 1.2;
         });
-
     });
 
 
@@ -220,7 +221,7 @@ const gameFlow = (() => {
 
 //GameFlowTwoPlayer Module
 
-const TwoPlayer = (() => {
+(() => {
 
     const _changeTurn = () => {
         if (gameFlow.currentPlayerTurn == playerOne.name){
@@ -240,11 +241,11 @@ const TwoPlayer = (() => {
             if (grid.innerHTML === "" && gameFlow.gameMode == 2) {
                 gameBoard.addMarker(grid.id, gameFlow.currentPlayerMarker);
                 grid.innerHTML = gameFlow.currentPlayerMarker;
-                if (gameBoard.checkWin() === "win") {
+                if (gameBoard.checkWin(gameBoard.board) === "win") {
                     display.victory();
                     return;
                 }
-                if (gameBoard.checkWin() === "drawn"){
+                if (gameBoard.checkWin(gameBoard.board) === "drawn"){
                     display.draw();
                     return;
                 }
@@ -257,26 +258,29 @@ const TwoPlayer = (() => {
 
 //GameFlowSinglePlayer Module
 
-const SinglePlayer = (() => {
+(() => {
 
     const _computerMove = () => {
         
-        let _availMoves = gameBoard.availGrids(gameBoard.currentBoard());
-        let i = Math.floor(Math.random() * _availMoves.length);
-        gameBoard.addMarker(_availMoves[i], gameFlow.currentPlayerMarker);
+        let choice;
+
+        if (gameFlow.gameMode === 1.1) choice = easyComputer.chooseGrid();
+        if (gameFlow.gameMode === 1.2) choice = hardComputer.chooseGrid();
+
+        gameBoard.addMarker(choice, gameFlow.currentPlayerMarker);
 
         const grids = document.querySelectorAll('.grid');
         grids.forEach((grid) => {
-            if (grid.id == _availMoves[i]){
+            if (grid.id == choice){
                 grid.innerHTML = gameFlow.currentPlayerMarker;
             }
         });
         
-        if (gameBoard.checkWin() === "win") {
+        if (gameBoard.checkWin(gameBoard.board) === "win") {
             display.victory();
             return;
         }
-        if (gameBoard.checkWin() === "drawn"){
+        if (gameBoard.checkWin(gameBoard.board) === "drawn"){
             display.draw();
             return;
         }
@@ -290,15 +294,15 @@ const SinglePlayer = (() => {
     const gridButtons = document.querySelectorAll('.grid');
     gridButtons.forEach((grid) => {
         grid.addEventListener('click', () => {
-            if (grid.innerHTML === "" && gameFlow.gameMode === 1 && gameFlow.currentPlayerMarker === playerOne.marker) {
+            if (grid.innerHTML === "" && gameFlow.gameMode !== 2 && gameFlow.currentPlayerMarker === playerOne.marker) {
                 gameBoard.addMarker(grid.id, gameFlow.currentPlayerMarker);
                 grid.innerHTML = gameFlow.currentPlayerMarker;
-                if (gameBoard.checkWin() === "win") {
+                if (gameBoard.checkWin(gameBoard.board) === "win") {
                     display.victory();
                     gameFlow.currentPlayerMarker = "";
                     return;
                 }
-                if (gameBoard.checkWin() === "drawn"){
+                if (gameBoard.checkWin(gameBoard.board) === "drawn"){
                     display.draw();
                     return;
                 }
@@ -317,45 +321,63 @@ const SinglePlayer = (() => {
 
 
 
+const easyComputer = (() => {
+    const chooseGrid = () => {
+        let _availMoves = gameBoard.availGrids(gameBoard.board);
+        let i = Math.floor(Math.random() * _availMoves.length);
+        return _availMoves[i];
+    }
+    return {chooseGrid};
+})();
 
 
 
 
-
-const computerBrain = (() => {
+const hardComputer = (() => {
     
-    const findBestMove = (board) => {
+    const chooseGrid = () => {
 
-        let _availMoves = gameBoard.availGrids(gameBoard.currentBoard());
+        let _availMoves = gameBoard.availGrids(gameBoard.board);
+        //let _availMoves = [];
         let moves = [];
+        console.log(_availMoves);
 
 
         _availMoves.forEach(index => {
-            let newBoard = board;
-            newBoard[index] = aiPlayer.getMarker();
+            let newBoard = gameBoard.board.slice(0);
+            newBoard[index] = 'O';
             let moveScore = _minimax(newBoard, 0, "AI");
             moves.push({index: index, score: moveScore});
         });
+        console.log({moves});
+        let _findBestMove = moves.reduceRight((highest, move) => {
+            return (highest.score || 0) > move.score ? highest : move;
+        }, {})
 
-        return moves;
+        console.log(_findBestMove);
+
+        return _findBestMove.index;
     };
 
+ 
 
     const _minimax = (board, depth, player) => {
-        
         let _availMoves = gameBoard.availGrids(board);
-
-        if (gameBoard.checkWin() === "drawn") return 0;
-        if (gameBoard.checkWin() === "win" && player === "human") return -10 + depth;
-        if (gameBoard.checkWin() === "win" && player === "AI") return 10 - depth;
+       
+        //console.log({board,depth,player});
+    
+        if (gameBoard.checkWin(board) === "drawn") {console.log("draw"); return 0;}
+        if (gameBoard.checkWin(board) === "win" && player === "human") {console.log("playerwin"); return -10 + depth;}
+        if (gameBoard.checkWin(board) === "win" && player === "AI") {console.log("AIwin"); return 10 - depth;}
 
         
         if (player === "AI"){
             let bestValue = -Infinity
             _availMoves.forEach(index => {
-                let newBoard = board;
-                newBoard[index] = aiPlayer.getMarker();
+                let newBoard = board.slice(0);
+                newBoard[index] = "O";
                 let value = _minimax(newBoard, depth+1, "human");
+                console.log
                 bestValue = Math.max(bestValue, value);
             });
             return bestValue;
@@ -365,7 +387,7 @@ const computerBrain = (() => {
             let bestValue = +Infinity
             _availMoves.forEach(index => {
                 let newBoard = board;
-                newBoard[index] = aiPlayer.getMarker();
+                newBoard[index] = "X";
                 let value = _minimax(newBoard, depth+1, "AI");
                 bestValue = Math.min(bestValue, value);
             });
@@ -374,6 +396,6 @@ const computerBrain = (() => {
         
     };
 
-    return{findBestMove}
+    return{chooseGrid}
 
 })()
